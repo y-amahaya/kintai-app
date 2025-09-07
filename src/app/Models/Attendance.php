@@ -66,4 +66,9 @@ class Attendance extends Model
 
         return max(0, $worked - 480);
     }
+
+    public function correction()
+    {
+        return $this->hasOne(AttendanceCorrection::class);
+    }
 }

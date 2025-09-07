@@ -21,21 +21,17 @@ return new class extends Migration
                 ->nullable()->constrained('users')->nullOnDelete();
 
             $table->dateTime('requested_clock_in_at')->nullable();
-            $table->dateTime('requested_break_start_at')->nullable();
-            $table->dateTime('requested_break_end_at')->nullable();
             $table->dateTime('requested_clock_out_at')->nullable();
-            $table->unsignedSmallInteger('requested_break_minutes')->nullable();
 
             $table->text('reason');
-            $table->enum('status', ['pending','approved','rejected'])->default('pending');
-            $table->dateTime('reviewed_at')->nullable();
-            $table->text('review_comment')->nullable();
+            $table->unsignedTinyInteger('status')
+                ->default(0)
+                ->comment('0=pending,1=approved,2=rejected');
 
             $table->timestamps();
 
             $table->index('attendance_id');
             $table->index(['applicant_id', 'status']);
-            $table->index(['status', 'reviewed_at']);
 
         });
     }
