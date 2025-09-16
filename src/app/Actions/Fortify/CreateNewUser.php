@@ -16,14 +16,12 @@ class CreateNewUser implements CreatesNewUsers
             'name'          => ['required', 'string', 'max:50'],
             'email'         => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password'      => ['required', 'confirmed', Password::defaults()],
-            'department_id' => ['nullable', 'integer', 'exists:departments,id'],
         ])->validate();
 
         return User::create([
             'name'          => $input['name'],
             'email'         => $input['email'],
             'password'      => Hash::make($input['password']),
-            'department_id' => $input['department_id'] ?? null,
             'role'          => User::ROLE_EMPLOYEE,
         ]);
     }

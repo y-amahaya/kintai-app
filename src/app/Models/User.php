@@ -11,8 +11,8 @@ class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable;
 
-    public const ROLE_ADMIN = 'admin';
-    public const ROLE_USER  = 'user';
+    public const ROLE_ADMIN = 90;
+    public const ROLE_EMPLOYEE  = 10;
 
     protected $fillable = [
         'name', 'email', 'password', 'role', 'department_id',
@@ -23,6 +23,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password'          => 'hashed',
+        'role'              => 'integer',
     ];
 
     public function department()
@@ -67,6 +68,16 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function scopeUsers($q)
     {
-        return $q->where('role', self::ROLE_USER);
+        return $q->where('role', self::ROLE_EMPLOYEE);
+    }
+
+    public function submittedCorrections()
+    {
+        return $this->hasMany(AttendanceCorrection::class, 'applicant_id');
+    }
+
+    public function reviewCorrections()
+    {
+        return $this->hasMany(AttendanceCorrection::class, 'reviewer_id');
     }
 }
