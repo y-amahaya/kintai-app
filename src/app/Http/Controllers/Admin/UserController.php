@@ -3,63 +3,22 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * なぜ: スタッフ一覧の表示に専念。部署/在籍状態のフィルタは後で追加。
      */
     public function index()
     {
-        //
+        return view('admin.staff.index');
     }
 
     /**
-     * Show the form for creating a new resource.
+     * なぜ: スタッフ詳細。編集や権限変更は別アクションに分離して意図を明確化。
      */
-    public function create()
+    public function show(int $id)
     {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return view('admin.staff.show', compact('id'));
     }
 }

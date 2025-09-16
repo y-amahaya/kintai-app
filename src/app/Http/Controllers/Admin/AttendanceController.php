@@ -3,63 +3,22 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 
 class AttendanceController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * なぜ: 管理者の全体一覧。検索/絞り込みは将来FormRequest/Queryに移譲。
      */
     public function index()
     {
-        //
+        return view('admin.attendance.index');
     }
 
     /**
-     * Show the form for creating a new resource.
+     * なぜ: 管理者の個別勤怠詳細。将来はユーザー情報等をeager load予定。
      */
-    public function create()
+    public function show(int $id)
     {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return view('admin.attendance.show', compact('id'));
     }
 }
