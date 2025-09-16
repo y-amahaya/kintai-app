@@ -33,8 +33,6 @@ class AttendanceSeeder extends Seeder
                     ['user_id' => $userId, 'work_date' => $workDate],
                     [
                         'clock_in_at'        => $clockIn,
-                        'break_start_at'     => $breakSt,
-                        'break_end_at'       => $breakEnd,
                         'clock_out_at'       => $clockOut,
                         'break_minutes'      => $breakMins,
                         'total_work_minutes' => $totalMins,

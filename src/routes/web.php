@@ -1,37 +1,79 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AttendanceCorrectionController;
-use App\Http\Controllers\Admin\CorrectionReviewController;
+use App\Http\Controllers\Admin\AttendanceController as AdminAttendanceController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\StaffAttendanceController as AdminStaffAttendanceController;
+use App\Http\Controllers\Admin\CorrectionReviewController as AdminCorrectionReviewController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
-// 一般ユーザー（認証必須）
+// 管理者ログイン
+Route::middleware('web')->group(function () {
+    Route::view('/admin/login', 'admin.auth.login')->name('admin.login');
+
+    Route::post('/admin/logout', function (\Illuminate\Http\Request $request) {
+        \Illuminate\Support\Facades\Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return to_route('admin.login');
+    })->name('admin.logout');
+});
+
+// 一般ユーザー
 Route::middleware('auth')->group(function () {
-    Route::view('/attendance', 'attendance.create')->name('attendance.create');
-    Route::view('/attendance/list', 'attendance.list.index')->name('attendance.list.index');
-    Route::view('/attendance/detail/{id}', 'attendance.detail.show')
-        ->whereNumber('id')->name('attendance.detail.show');
+    // 勤怠登録
+    Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.create');
+
+    // 勤怠一覧
+    Route::get('/attendance/list', [AttendanceController::class, 'listing'])->name('attendance.list.index');
+
+    // 勤怠詳細
+    Route::get('/attendance/detail/{id?}', [AttendanceController::class, 'show'])
+        ->whereNumber('id')
+        ->name('attendance.detail.show');
+
+    // 申請一覧
+    Route::get('/stamp_correction_request/list', [AttendanceCorrectionController::class, 'index'])
+        ->name('corrections.index');
+    // 申請詳細
+    Route::get('/stamp_correction_request/{correction}', [AttendanceCorrectionController::class, 'show'])
+        ->name('corrections.show');
 });
 
-// 管理者（認証 + 権限）
-Route::prefix('admin')->middleware(['auth','role:90'])->group(function () {
-    Route::view('/login', 'admin.auth.login')->name('admin.auth.login');
+// 管理者
+Route::prefix('admin')->middleware(['auth'])->group(function () {
+    Route::get('/attendance', [AdminAttendanceController::class, 'index'])->name('admin.attendance.index');
+    Route::get('/attendance/{id}', [AdminAttendanceController::class, 'show'])
+        ->whereNumber('id')->name('admin.attendance.show');
 
-    Route::view('/attendance', 'admin.attendance.index')->name('admin.attendance.index');
-    Route::view('/attendance/{id}', 'admin.attendance.show')->whereNumber('id')->name('admin.attendance.show');
+    Route::get('/users', [AdminUserController::class, 'index'])->name('admin.users.index');
+    Route::get('/users/{id}', [AdminUserController::class, 'show'])
+        ->whereNumber('id')->name('admin.users.show');
 
-    Route::view('/staff/list', 'admin.staff.index')->name('admin.staff.index');
-    Route::view('/attendance/staff/{id}', 'admin.staff.attendance.show')
+    Route::get('/attendance/staff/{id}', [AdminStaffAttendanceController::class, 'show'])
         ->whereNumber('id')->name('admin.staff.attendance.show');
-});
 
-// 修正申請（管理）— 一覧はビュー、承認はPOSTアクション
-Route::middleware(['auth','role:90'])->group(function () {
-    Route::view('/stamp_correction_request/list', 'stamp_correction_request.list.index')
-        ->name('stamp_correction_request.list.index');
+    // 申請一覧
+    Route::get('/requests', [AdminCorrectionReviewController::class, 'index'])->name('admin.requests.index');
 
-    // 承認処理は副作用があるためPOSTでControllerへ
-    Route::post('/stamp_correction_request/approve/{attendance_correct_request}',
-        [CorrectionReviewController::class, 'approve'])
+    // 申請詳細
+    Route::get('/requests/{correction}', [AdminCorrectionReviewController::class, 'show'])
+        ->whereNumber('correction')
+        ->name('admin.requests.show');
+
+    // 申請承認
+    Route::post('/requests/{attendance_correct_request}', [AdminCorrectionReviewController::class, 'approve'])
         ->whereNumber('attendance_correct_request')
-        ->name('stamp_correction_request.approve');
+        ->name('admin.corrections.approve');
 });
+
+// ログアウト
+Route::post('/logout', function (Request $request) {
+    Auth::logout();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+
+    return redirect('/login');
+})->name('logout');

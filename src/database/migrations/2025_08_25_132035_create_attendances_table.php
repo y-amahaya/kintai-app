@@ -44,20 +44,6 @@ return new class extends Migration
                 ->after('status');
         });
 
-        DB::statement("
-            UPDATE attendances
-            SET work_minutes = COALESCE(
-                total_work_minutes,
-                GREATEST(
-                    0,
-                    CASE
-                        WHEN clock_in_at IS NOT NULL AND clock_out_at IS NOT NULL
-                        THEN TIMESTAMPDIFF(MINUTE, clock_in_at, clock_out_at) - COALESCE(break_minutes, 0)
-                        ELSE 0
-                    END
-                )
-            )
-        ");
     }
 
     public function down(): void

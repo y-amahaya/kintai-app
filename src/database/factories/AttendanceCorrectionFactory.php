@@ -3,6 +3,8 @@
 namespace Database\Factories;
 
 use App\Models\AttendanceCorrection;
+use App\Models\Attendance;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class AttendanceCorrectionFactory extends Factory
@@ -12,15 +14,12 @@ class AttendanceCorrectionFactory extends Factory
     public function definition(): array
     {
         return [
-            'requested_clock_in_at'   => null,
-            'requested_break_start_at'=> null,
-            'requested_break_end_at'  => null,
-            'requested_clock_out_at'  => null,
-            'requested_break_minutes' => null,
-            'reason'                  => $this->faker->realText(40),
-            'status'                  => 'pending',
-            'reviewed_at'             => null,
-            'review_comment'          => null,
+            'attendance_id'            => Attendance::factory(),
+            'applicant_id'             => User::factory(),
+            'reviewer_id'              => null,
+            'requested_clock_in_at'    => null,
+            'requested_clock_out_at'   => null,
+            'reason'                   => $this->faker->realText(40),
         ];
     }
 }

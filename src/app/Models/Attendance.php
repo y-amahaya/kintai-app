@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Support\Carbon;
 
 class Attendance extends Model
 {
@@ -25,6 +24,17 @@ class Attendance extends Model
         'clock_out_at'=> 'datetime',
         'break_minutes' => 'integer',
     ];
+
+    public function getActualBreakMinutesAttribute(): int
+    {
+        $breaks = $this->relationLoaded('breaks')
+            ? $this->breaks
+            : $this->breaks()->get();
+
+        $sum = $breaks->sum(fn ($b) => $b->duration_minutes ?? 0);
+
+        return $sum > 0 ? $sum : (int)($this->break_minutes ?? 0);
+    }
 
     public function user()
     {
@@ -54,7 +64,7 @@ class Attendance extends Model
         $out = $this->clock_out_at;
 
         $total = $out->diffInMinutes($in);
-        $break = (int) ($this->break_minutes ?? 0);
+        $break = $this->actual_break_minutes;
 
         return max(0, $total - $break);
     }

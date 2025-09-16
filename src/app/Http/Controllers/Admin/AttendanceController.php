@@ -17,13 +17,11 @@ class AttendanceController extends Controller
         $prevDay = $day->copy()->subDay()->toDateString();
         $nextDay = $day->copy()->addDay()->toDateString();
 
-        // ★ 出勤日時で当日分を絞る（専用日付列が無い前提）
         $attendances = Attendance::with('user:id,name')
-            ->whereDate('clock_in_at', $day)   // ← ここを clock_in_at に変更
+            ->whereDate('clock_in_at', $day)
             ->orderBy('id')
             ->paginate(10);
 
-        // 表示変換（そのまま）
         $attendances->setCollection(
             $attendances->getCollection()->map(function ($att) {
                 $fmtTime = function ($v) {
@@ -51,6 +49,35 @@ class AttendanceController extends Controller
             'prevDay'     => $prevDay,
             'nextDay'     => $nextDay,
             'attendances' => $attendances,
+        ]);
+    }
+
+    public function show(int $id)
+    {
+        $att = \App\Models\Attendance::with('user:id,name')->findOrFail($id);
+
+        $fmtTime = static function ($v) {
+            return empty($v) ? '' : \Carbon\Carbon::parse($v)->format('H:i');
+        };
+
+        $baseDate = $att->clock_in_at ?: $att->clock_out_at ?: now();
+        $yearLabel     = \Carbon\Carbon::parse($baseDate)->isoFormat('YYYY年');
+        $monthDayLabel = \Carbon\Carbon::parse($baseDate)->locale('ja')->isoFormat('M月D日');
+
+        return view('admin.attendance.show', [
+            'attendance' => $att,
+            'name'       => optional($att->user)->name ?? '',
+            'yearLabel'  => $yearLabel,
+            'monthDay'   => $monthDayLabel,
+            'inTime'     => $fmtTime($att->clock_in_at ?? null),
+            'outTime'    => $fmtTime($att->clock_out_at ?? null),
+
+            'break1Start'=> $fmtTime(data_get($att, 'break_started_at')),
+            'break1End'  => $fmtTime(data_get($att, 'break_ended_at')),
+            'break2Start'=> $fmtTime(data_get($att, 'break2_started_at')),
+            'break2End'  => $fmtTime(data_get($att, 'break2_ended_at')),
+
+            'note'       => $att->note ?? '',
         ]);
     }
 }

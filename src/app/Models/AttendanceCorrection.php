@@ -9,6 +9,10 @@ class AttendanceCorrection extends Model
 {
     use HasFactory;
 
+    public const STATUS_PENDING  = 'pending';
+    public const STATUS_APPROVED = 'approved';
+    public const STATUS_REJECTED = 'rejected';
+
     protected $fillable = [
         'attendance_id','applicant_id','reviewer_id',
         'requested_clock_in_at','requested_break_start_at','requested_break_end_at',
@@ -23,6 +27,10 @@ class AttendanceCorrection extends Model
         'requested_clock_out_at'   => 'datetime',
         'requested_break_minutes'  => 'integer',
         'reviewed_at'              => 'datetime',
+    ];
+
+    protected $attributes = [
+        'status' => self::STATUS_PENDING,
     ];
 
     public function attendance() { return $this->belongsTo(Attendance::class); }

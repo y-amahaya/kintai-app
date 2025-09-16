@@ -12,51 +12,39 @@ class AttendanceCorrectionSeeder extends Seeder
 {
     public function run(): void
     {
-        $all = Attendance::query()->with('user:id,role')->get();
-
-        if ($all->isEmpty()) {
+        $attendances = Attendance::query()->with('user:id,role')->get();
+        if ($attendances->isEmpty()) {
             return;
         }
 
         $adminId = User::where('role', User::ROLE_ADMIN)->value('id');
 
-        $targetCount = (int) floor($all->count() * 0.10);
-        $targets = $all->random($targetCount);
+        $targetCount = (int) floor($attendances->count() * 0.10);
+        if ($targetCount === 0) {
+            return;
+        }
+        $targets = $attendances->shuffle()->take($targetCount);
 
         foreach ($targets as $attendance) {
             $applicantId = $attendance->user_id;
 
-            $rand = mt_rand(1, 100);
-            if ($rand <= 70) {
-                $status = 'approved';
-            } elseif ($rand <= 90) {
-                $status = 'pending';
-            } else {
-                $status = 'rejected';
+            $r = mt_rand(1, 100);
+            $status = ($r <= 70) ? 1 : (($r <= 90) ? 0 : 2);
+
+            if (empty($attendance->clock_out_at)) {
+                continue;
             }
-
-            $reviewedAt = in_array($status, ['approved', 'rejected'], true)
-                ? Carbon::parse($attendance->work_date)->addDay()->setTime(10, 0, 0)
-                : null;
-
-            $reviewerId = $reviewedAt ? $adminId : null;
-
             $requestedClockOut = Carbon::parse($attendance->clock_out_at)->addMinutes(10);
 
             AttendanceCorrection::updateOrCreate(
                 ['attendance_id' => $attendance->id],
                 [
-                    'applicant_id'              => $applicantId,
-                    'reviewer_id'               => $reviewerId,
-                    'requested_clock_in_at'     => null,
-                    'requested_break_start_at'  => null,
-                    'requested_break_end_at'    => null,
-                    'requested_clock_out_at'    => $requestedClockOut,
-                    'requested_break_minutes'   => null,
-                    'reason'                    => '退勤時刻の修正申請',
-                    'status'                    => $status,
-                    'reviewed_at'               => $reviewedAt,
-                    'review_comment'            => $reviewedAt ? '確認済み' : null,
+                    'applicant_id'           => $applicantId,
+                    'reviewer_id'            => $adminId ?: null,
+                    'requested_clock_in_at'  => null,
+                    'requested_clock_out_at' => $requestedClockOut,
+                    'reason'                 => '退勤時刻の修正申請',
+                    'status'                 => $status,
                 ]
             );
         }

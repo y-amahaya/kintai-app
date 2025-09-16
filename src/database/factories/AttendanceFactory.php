@@ -3,8 +3,9 @@
 namespace Database\Factories;
 
 use App\Models\Attendance;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 
 class AttendanceFactory extends Factory
 {
@@ -12,46 +13,32 @@ class AttendanceFactory extends Factory
 
     public function definition(): array
     {
-        $date = Carbon::today()->toDateString();
-        $clockIn   = Carbon::parse("$date 09:00:00");
-        $breakSt   = Carbon::parse("$date 12:00:00");
-        $breakEnd  = Carbon::parse("$date 13:00:00");
-        $clockOut  = Carbon::parse("$date 18:00:00");
-
-        $breakMinutes  = 60;
-        $totalWorkMins = $clockOut->diffInMinutes($clockIn) - $breakMinutes;
+        $date     = Carbon::today();
+        $clockIn  = (clone $date)->setTime(9, 0);
+        $clockOut = (clone $date)->setTime(18, 0);
 
         return [
-            'work_date'          => $date,
-            'clock_in_at'        => $clockIn,
-            'break_start_at'     => $breakSt,
-            'break_end_at'       => $breakEnd,
-            'clock_out_at'       => $clockOut,
-            'break_minutes'      => $breakMinutes,
-            'total_work_minutes' => $totalWorkMins,
-            'note'               => null,
+            'user_id'       => User::factory(),
+            'work_date'     => $date->toDateString(),
+            'clock_in_at'   => $clockIn,
+            'clock_out_at'  => $clockOut,
+            'break_minutes' => 60,
+            'note'          => null,
         ];
     }
 
     public function forDate(string $ymd): self
     {
-        $clockIn  = Carbon::parse("$ymd 09:00:00");
-        $breakSt  = Carbon::parse("$ymd 12:00:00");
-        $breakEnd = Carbon::parse("$ymd 13:00:00");
-        $clockOut = Carbon::parse("$ymd 18:00:00");
-
-        $break = 60;
-        $total = $clockOut->diffInMinutes($clockIn) - $break;
+        $date     = Carbon::parse($ymd);
+        $clockIn  = (clone $date)->setTime(9, 0);
+        $clockOut = (clone $date)->setTime(18, 0);
 
         return $this->state(fn () => [
-            'work_date'          => $ymd,
-            'clock_in_at'        => $clockIn,
-            'break_start_at'     => $breakSt,
-            'break_end_at'       => $breakEnd,
-            'clock_out_at'       => $clockOut,
-            'break_minutes'      => $break,
-            'total_work_minutes' => $total,
-            'note'               => null,
+            'work_date'     => $date->toDateString(),
+            'clock_in_at'   => $clockIn,
+            'clock_out_at'  => $clockOut,
+            'break_minutes' => 60,
+            'note'          => null,
         ]);
     }
 }

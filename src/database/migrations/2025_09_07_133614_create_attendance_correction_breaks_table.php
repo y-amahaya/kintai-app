@@ -20,7 +20,10 @@ return new class extends Migration
 
             $table->timestamps();
 
-            $table->index(['attendance_correction_id', 'start_at']);
+            $table->index(
+                ['attendance_correction_id', 'start_at'],
+                'acb_accid_start_idx'
+            );
         });
     }
 
