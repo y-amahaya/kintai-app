@@ -38,6 +38,12 @@ Laravel11.45.2
 MySQL8.0.26
 Nginx1.21.1
 
+## セッション設定
+
+ファイルセッション
+`.env` に `SESSION_DRIVER=file` を設定
+`session.php` に `'driver' => env('SESSION_DRIVER', 'file')` を設定
+
 ## テーブル設計
 
 ![alt text](docs/image.png)
